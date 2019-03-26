@@ -57,7 +57,9 @@ public class App {
 	singletonScopeTextEditor.makeSpellCheck();
 	TextEditorScoped anotherSingletonScopeTextEditor = injector.getInstance(TextEditorScoped.class);
 	anotherSingletonScopeTextEditor.makeSpellCheck();
-	
+	//Guice AOP
+	TextEditorAOP aopTextEditor = injector.getInstance(TextEditorAOP.class);
+	aopTextEditor.makeSpellCheck();
 	
 	
 

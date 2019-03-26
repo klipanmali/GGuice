@@ -171,3 +171,16 @@ At Method level:
 		return SpellChecker;
 	}
 
+>>>>>
+Guice AOP
+The functions that span multiple points of an application are called cross-cutting concerns and these cross-cutting concerns are
+conceptually separate from the application's business logic.
+Dependency Injection helps you decouple your application objects from each other and AOP helps you decouple cross-cutting concerns
+from the objects that they affect.
+Important Classes
+	Matcher − Matcher is an interface to either accept or reject a value. In Guice AOP, we need two matchers: one to define which
+				classes participate, and another for the methods of those classes.
+	MethodInterceptor − MethodInterceptors are executed when a matching method is called. They can inspect the call: the method,
+						its arguments, and the receiving instance. We can perform cross-cutting logic and then delegate to
+						the underlying method. Finally, we may inspect the return value or exception and return.
+

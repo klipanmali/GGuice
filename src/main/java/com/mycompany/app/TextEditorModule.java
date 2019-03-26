@@ -2,6 +2,7 @@ package com.mycompany.app;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
 
 public class TextEditorModule extends AbstractModule {
@@ -39,6 +40,9 @@ public class TextEditorModule extends AbstractModule {
 	// @ProvidedBy annotation, similar to Provider class, but doesn't
 	// require binding
 	// On demand Injection, also doesn't require extra binding
+	//Guice AOP
+	// need two matchers: one to define which classes participate, and another for the methods of those classes
+	bindInterceptor(Matchers.any(),Matchers.annotatedWith(CallTracker.class), new CallTrackingService());
     }
 
     // if binding object is a little bit complex
