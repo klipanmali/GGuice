@@ -439,11 +439,37 @@ Important Classes
 						its arguments, and the receiving instance. We can perform cross-cutting logic and then delegate to
 						the underlying method. Finally, we may inspect the return value or exception and return.
 
+Behind the scenes, method interception is implemented by generating bytecode at runtime.
+If you are on a platform that doesn't support bytecode generation (such as Android), you should use Guice without AOP support.
+
+This approach imposes limits on what classes and methods can be intercepted:
+	Classes must be public or package-private.
+	Classes must be non-final
+	Methods must be public, package-private or protected
+	Methods must be non-final
+	Instances must be created by Guice by an @Inject-annotated or no-argument constructor It is not possible to use method interception on instances that aren't constructed by Guice.
+
+If you need to inject dependencies into an interceptor, use the requestInjection API.
+	public class NotOnWeekendsModule extends AbstractModule {
+		protected void configure() {
+			WeekendBlocker weekendBlocker = new WeekendBlocker();
+			requestInjection(weekendBlocker);
+			bindInterceptor(Matchers.any(), Matchers.annotatedWith(NotOnWeekends.class), weekendBlocker);
+		}
+	}
+or use Binder.getProvider
+	public class NotOnWeekendsModule extends AbstractModule {
+		protected void configure() {
+			bindInterceptor(any(),annotatedWith(NotOnWeekends.class),new WeekendBlocker(getProvider(Calendar.class)));
+		}
+	}
+Use caution when injecting interceptors. If your interceptor calls a method that it itself is intercepting,
+you may receive a StackOverflowException due to unending recursion.
+
 >>>>>
 Minimize mutability
 
 Wherever possible, use constructor injection to create immutable objects.
-
 	public class RealPaymentService implements PaymentService { 
 	
 		private final PaymentQueue paymentQueue; 
@@ -463,3 +489,46 @@ Constructor injection has some limitations:
 Method injection is most useful when you need to initialize an instance that is not constructed by Guice.Field injection has the most compact syntax,
 so it shows up frequently on slides and in examples. It is neither encapsulated nor testable.
 Never inject final fields; the JVM doesn't guarantee that the injected value will be visible to all threads.
+
+>>>>>
+Inject only direct dependencies
+
+Avoid injecting an object only as a means to get at another object.
+Bad:
+	@Inject 
+		ShowBudgets(Customer customer) {
+			account = customer.getPurchasingAccount(); 
+	}
+Good:
+	@Provides 
+	Account providePurchasingAccount(Customer customer) { 
+	 return customer.getPurchasingAccount();
+	}
+	...
+	@Inject 
+	ShowBudgets(Account account) { 
+		this.account = account; 
+	} 
+
+>>>>>
+CyclicDependencies
+
+Store deponds on Boss, Boss depoends on Clerk, and Clerk depends on Store  
+One way to break cyclic dependency with the provider
+Instead
+	public class Clerk {
+		private final CustomerLine line;
+		
+		@Inject Clerk(CustomerLine line) {
+			this.line = line;
+		}
+		...
+	}
+ 
+	public class Clerk {
+		private final Provider<Store> shopProvider;
+		@Inject Clerk(Provider<Store> shopProvider) {
+			this.shopProvider = shopProvider;
+		}
+		...
+	}
