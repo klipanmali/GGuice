@@ -44,6 +44,10 @@ public class TextEditorModule extends AbstractModule {
 		// @ProvidedBy annotation, similar to Provider class, but doesn't
 		// require binding
 		// On demand Injection, also doesn't require extra binding
+		// Inject Providers
+		// If you want to inject custom provider instead of the default one, you need to
+		// bind it to type
+		bind(TransactionLogger.class).toProvider(TransactionLogProvider.class);
 		// Guice AOP
 		// need two matchers: one to define which classes participate, and another for
 		// the methods of those classes
