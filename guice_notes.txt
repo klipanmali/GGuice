@@ -126,3 +126,7 @@ Non-private, No-argument constructors are eligible for just-in-time bindings. An
 >>>>>
 @ImplementatedBy annotation tells the guice about the implementation class. No binding is required in Binding Module
 in such a case.
+
+>>>>>
+@ProvidedBy annotation tells the guice about the provider of implementation class. No binding is required in Binding Module
+in such a case.

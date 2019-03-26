@@ -35,7 +35,8 @@ public class TextEditorModule extends AbstractModule {
 	// Constants binding, bind to instance
 	bind(String.class).annotatedWith(Names.named("JDBCcons")).toInstance("jdbc:mysql://localhost:53266/emp");
 	// @ImplementedBy annotation, No binding is required in Binding Module
-
+	// @ProvidedBy annotation, similar to Provider class, but doesn't
+	// require binding
     }
 
     // if binding object is a little bit complex
