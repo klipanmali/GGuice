@@ -31,6 +31,11 @@ public class App {
 	complexTextEditor2.makeSpellCheck();
 	TextEditorConstructor constructorTextEditor = injector.getInstance(TextEditorConstructor.class);
 	constructorTextEditor.makeSpellCheck();
+	// Inbuilt Bindings, Logger is automatically bind to
+	// java.util.logging.Logger class
+	// No extra binding in Module is neccesaary
+	TextEditorLogger loggerTxtEditor = injector.getInstance(TextEditorLogger.class);
+	loggerTxtEditor.makeSpellCheck();
 
     }
 }
