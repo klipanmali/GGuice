@@ -122,3 +122,7 @@ explicit bindings are considered for mapping.
 
 Non-private, No-argument constructors are eligible for just-in-time bindings. Another way is to annotate a constructor with
 @Inject annotation.
+
+>>>>>
+@ImplementatedBy annotation tells the guice about the implementation class. No binding is required in Binding Module
+in such a case.

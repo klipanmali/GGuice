@@ -32,7 +32,9 @@ public class TextEditorModule extends AbstractModule {
 	} catch (NoSuchMethodException | SecurityException e) {
 	    System.out.println("Required constructor missing");
 	}
+	// Constants binding, bind to instance
 	bind(String.class).annotatedWith(Names.named("JDBCcons")).toInstance("jdbc:mysql://localhost:53266/emp");
+	// @ImplementedBy annotation, No binding is required in Binding Module
 
     }
 
