@@ -1,4 +1,7 @@
 Injection is a process of injecting dependency into an object.
+The dependency injection pattern separates behaviour from dependency resolution. Rather than looking up dependencies directly or from factories,
+the pattern recommends that dependencies are passed in. The process of setting dependencies into an object is called injection.
+
 This "main" method introduces a fundamental concept of Guice: the Module. The Module is the basic unit of definition of bindings
 (or wiring, as it’s known in Spring).Guice has adopted a code-first approach for dependency injection and management so
 you won’t be dealing with a lot of XML out-of-the-box.
@@ -16,43 +19,50 @@ Binding is to Guice as wiring is to Spring. With bindings, you define how Guice 
 >>>>>
 Linked bindings
 In Linked bindings, Guice maps a type to its implementation.
-bind(SpellChecker.class).to(SpellCheckerImpl.class);
+	bind(SpellChecker.class).to(SpellCheckerImpl.class);
 and than 
-@Inject
-public TextEditor(SpellChecker spellChecker) {
-	....
-}
+	@Inject
+	public TextEditor(SpellChecker spellChecker) {
+		....
+	}
+
+>>>>>
+Binding Annotations
 
 In case we want to map a type with multiple implementations, we can create custom annotation as well.
-@BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
-@interface WinWord {}
+	@BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
+	@interface WinWord {}
 and than 
-bind(SpellChecker.class).annotatedWith(WinWord.class).to(WinWordSpellCheckerImpl.class);
+	bind(SpellChecker.class).annotatedWith(WinWord.class).to(WinWordSpellCheckerImpl.class);
 and than
-@Inject
-public TextEditor(@WinWord SpellChecker spellChecker) {
-	.....
-}
+	@Inject
+	public TextEditor(@WinWord SpellChecker spellChecker) {
+		.....
+	}
 
 Guice provides another way also to map bindings without creating a custom annotation. It allows so using @Named annotation.
-bind(SpellChecker.class).annotatedWith(Names.named("OpenOffice")).to(OpenOfficeWordSpellCheckerImpl.class);
+	bind(SpellChecker.class).annotatedWith(Names.named("OpenOffice")).to(OpenOfficeWordSpellCheckerImpl.class);
 and than
-@Inject
-public TextEditor(@Named("OpenOffice") SpellChecker spellChecker) {
-   .....
-}
+	@Inject
+	public TextEditor(@Named("OpenOffice") SpellChecker spellChecker) {
+	.....
+	}
+
+If you do decide to manually create a custom implementation of binding annotation with attribute values(similar to @Named annotation),
+be sure to properly implement the equals() and hashCode() specifications detailed in the Annotation Javadoc.
+Pass an instance of this class to the annotatedWith() binding clause.
 
 >>>>>
 Instance binding
 Guice provides a way to create bindings with value objects or constants.
-bind(String.class).annotatedWith(Names.named("JBDC")).toInstance("jdbc:mysql://localhost:5326/emp");
+	bind(String.class).annotatedWith(Names.named("JBDC")).toInstance("jdbc:mysql://localhost:5326/emp");
 and than 
-@Inject
-public void connectDatabase(@Named("JBDC") String dbUrl) {
-   //...
-}
+	@Inject
+	public void connectDatabase(@Named("JBDC") String dbUrl) {
+		//...
+	}
 
-bind(SpellChecker.class).toInstance(new SpellCheckerWinWord());
+	bind(SpellChecker.class).toInstance(new SpellCheckerWinWord());
 This binding will provide an instance of the SpellCheckerWinWord class wherever a SpellChecker variable is declared.
 In this case, however, the dependency tree of the class will not be automatically wired. You should limit the use
 of this mode where there isn’t any heavy initialization or dependency injection necessary.
@@ -63,117 +73,167 @@ You can use an @Provides method instead.
 Provider methods binding
 Guice provides a way to create bindings with complex objects using @provides annotated method.
 This method is being part of Binding Module and provides the complex object to be mapped.
-@Provides
-public SpellChecker provideSpellChecker() {
-   //.....
-   return spellChecker;
-}
+	@Provides
+	public SpellChecker provideSpellChecker() {
+	//.... create spellCHecker
+	return spellChecker;
+	}
 and than 
-@Inject
-public TextEditor(SpellChecker spellChecker) {
-	//....
-}
+	@Inject
+	public TextEditor(SpellChecker spellChecker) {
+		//....
+	}
 
-bind(MessageService.class).annotatedWith(Email.class).to(EmailService.class);
+If the @Provides method has a binding annotation like @PayPal or @Named("Checkout"), Guice binds the annotated type.
+Dependencies can be passed in as parameters to the method. The injector will exercise the bindings for each of these before invoking the method.
+
+  @Provides @PayPal
+  CreditCardProcessor providePayPalCreditCardProcessor(
+      @Named("PayPal API key") String apiKey) {
+    PayPalCreditCardProcessor processor = new PayPalCreditCardProcessor();
+    processor.setApiKey(apiKey);
+    return processor;
+  }
+  
+	bind(MessageService.class).annotatedWith(Email.class).to(EmailService.class);
 is same as
-@Provides
-@Email
-public MessageService provideMessageService() {
-  return new EmailService();
-}
- 
+	@Provides
+	@Email
+	public MessageService provideMessageService() {
+		return new EmailService();
+	}
+
+Guice does not allow exceptions to be thrown from Providers. Exceptions thrown by @Provides methods will be wrapped in a ProvisionException.
+It is bad practice to allow any kind of exception to be thrown -- runtime or checked -- from an @Provides method.
+If you need to throw an exception for some reason, you may want to use the ThrowingProviders extension @CheckedProvides methods.
+
 >>>>>
 Provider class binding
 As @provides method becomes more complex, these methods can be moved to separate classes using Provider interface.
-class SpellCheckerProvider implements Provider<SpellChecker> {
-   @Override
-   public SpellChecker get() {
-      //......
-      return SpellChecker;
-   } 
-}
+	class SpellCheckerProvider implements Provider<SpellChecker> {
+		@Override
+		public SpellChecker get() {
+			//......
+			return SpellChecker;
+		} 
+	}
 and than 
-bind(SpellChecker.class).toProvider(SpellCheckerProvider.class);
+	bind(SpellChecker.class).toProvider(SpellCheckerProvider.class);
 and than
-@Inject
-public TextEditor(SpellChecker spellChecker) {
-	//....
-}
+	@Inject
+	public TextEditor(SpellChecker spellChecker) {
+		//....
+	}
+
+Guice does not allow exceptions to be thrown from Providers. The Provider interface does not allow for checked exception to be thrown.
+RuntimeExceptions may be wrapped in a ProvisionException or CreationException and may prevent your Injector from being created.
+If you need to throw an exception for some reason, you may want to use the ThrowingProviders extension.
+
+>>>>>
+Untargetted Bindings
+You may create bindings without specifying a target. This is most useful for concrete classes and types annotated by either @ImplementedBy
+or @ProvidedBy. An untargetted binding informs the injector about a type, so it may prepare dependencies eagerly.
+Untargetted bindings have no to clause
+	bind(MyConcreteClass.class);
+	bind(AnotherConcreteClass.class).in(Singleton.class);
+When specifying binding annotations, you must still add the target binding, even it is the same concrete class.
+	bind(MyConcreteClass.class).annotatedWith(Names.named("foo")).to(MyConcreteClass.class);
+	bind(AnotherConcreteClass.class).annotatedWith(Names.named("foo")).to(AnotherConcreteClass.class).in(Singleton.class);
+
+>>>>>
+Constructor bindings
 
 Guice provides a way to create bindings with specific constructor of an object using toConstructor() method.
-//Binding Module
-@Override
-protected void configure() {
-   try {
-      bind(SpellChecker.class)
-         .toConstructor(SpellCheckerImpl.class.getConstructor(String.class));
-   } catch (NoSuchMethodException | SecurityException e) {
-      System.out.println("Required constructor missing");
-   } 
-   bind(String.class)
-      .annotatedWith(Names.named("JDBC"))
-      .toInstance("jdbc:mysql://localhost:5326/emp");
-}
+This comes up when the @Inject annotation cannot be applied to the target constructor: either because it is a third party class,
+or because multiple constructors that participate in dependency injection. That constructor does not need an @Inject annotation.
+@Provides methods provide the best solution to this problem!
+But there are limitations of that approach: manually constructed instances do not participate in AOP.
+	//Binding Module
+	@Override
+	protected void configure() {
+	try {
+		bind(SpellChecker.class)
+			.toConstructor(SpellCheckerImpl.class.getConstructor(String.class));
+	} catch (NoSuchMethodException | SecurityException e) {
+		System.out.println("Required constructor missing");
+	} 
+	bind(String.class)
+		.annotatedWith(Names.named("JDBC"))
+		.toInstance("jdbc:mysql://localhost:5326/emp");
+	}
 and than
-public SpellCheckerImpl(@Named("JDBC") String dbUrl) {
-   this.dbUrl = dbUrl;
-}
+	public SpellCheckerImpl(@Named("JDBC") String dbUrl) {
+	this.dbUrl = dbUrl;
+	}
 and than
-@Inject
-public TextEditor( SpellChecker spellChecker) {
-   this.spellChecker = spellChecker;
-}
+	@Inject
+	public TextEditor( SpellChecker spellChecker) {
+	this.spellChecker = spellChecker;
+	}
+
+Each toConstructor() binding is scoped independently. If you create multiple singleton bindings that target the same constructor,
+each binding yields its own instance.
+
+>>>>>
+BuiltIn Bindings
 
 Guice will implicitly inject some general purpose components like the Injector and an instance of java.util.Logger,
 among others. Guice provides inbuilt binding for java.util.logging.Logger class. Logger's name is automatically set
 to the name of the class into which the Logger is injected.
-@Inject
-public TextEditor( Logger logger) {
-   this.logger = logger;
-}
+Only the injector can create these bindings and attempting to bind them yourself is an error.
+	@Inject
+	public TextEditor( Logger logger) {
+		this.logger = logger;
+	}
 and than, actually nathing since guice provides inbuild binding to Logger class
 
->>>>>
-In other to create instance of the class, Guice will use @Inject annotated constructor. There can be one and only one
-@Inject annotated constructor. if there is no @Inject annotated constructor, default empty constructor is used.
+Other BuiltIn Bindings:
+	The Injector
+	Providers, for every type Guice knows about, it can also inject a Provider of that type.
+	TypeLiterals, Guice has complete type information for everything it injects. If you're injecting parameterized types, you can inject
+		a TypeLiteral<T> to reflectively tell you the element type.
+	The Stage, Guice supports a stage enum to differentiate between development and production runs.
+	MembersInjectors, when binding to providers or writing extensions, you may want Guice to inject dependencies into an object that you construct
+		yourself. To do this, add a dependency on a MembersInjector<T> (where T is your object's type), and then call
+		membersInjector.injectMembers(myNewObject).
 
 >>>>>
+JustInTimeBindings
+
 As bindings are defined in Binding Module, Guice uses them whenever it needs to inject dependencies. In case bindings are not
 present, it can attempt to create just-in-time bindings. Bindings present in binding module are called explicit bindings
 and are of higher precedence whereas just-in-time bindings are called implicit bindings. If both type of bindings are present,
 explicit bindings are considered for mapping.
 
+In other to create instance of the class, Guice will use @Inject annotated constructor. There can be one and only one
+@Inject annotated constructor. if there is no @Inject annotated constructor, default empty constructor is used.
+
 Non-private, No-argument constructors are eligible for just-in-time bindings. Another way is to annotate a constructor with
 @Inject annotation.
+
+Guice will not construct nested classes unless they have the "static" modifier. Inner classes have an implicit reference to their enclosing
+class that cannot be injected.
 
 >>>>>
 @ImplementatedBy annotation tells the guice about the implementation class. No binding is required in Binding Module
 in such a case.
+The @ImplementedBy annotation acts like a linked binding, specifying the subtype to use when building a type.
+If a type is in both a bind() statement (as the first argument) and has the @ImplementedBy annotation, the bind() statement is used.
+The annotation suggests a default implementation that can be overridden with a binding. Use @ImplementedBy carefully; it adds a compile-time
+dependency from the interface to its implementation.
 
 >>>>>
 @ProvidedBy annotation tells the guice about the provider of implementation class. No binding is required in Binding Module
 in such a case.
+The annotation is equivalent to a toProvider() binding.
+Like @ImplementedBy, if the type is annotated and used in a bind() statement, the bind() statement will be used.
 
 >>>>>
-Optional injection
-Optional injection means injecting the dependency if exists. Method and Field injections may be optionally dependent and should have
-some default value if dependency is not present.
+Scopes
 
-   private String dbUrl = "jdbc:mysql://localhost:5326/emp";
-   ...
-   @Inject(optional=true)
-   public void setDbUrl(@Named("JDBC") String dbUrl) {
-      this.dbUrl = dbUrl;
-   }
-   
->>>>>
-On-Demand Injection
-Method and field injections can be used to initialize using exiting object using injector.injectMembers() method.
-
->>>>>
 Guice returns a new instance every time when it supplies a value as its default behavior.
 This is configurable via scopes. Following are the built in scopes that Guice supports :
-@Singleton
+@Singleton - reuse instances for the lifetime of an application
 @SessionScope
 @RequestScope
 
@@ -192,7 +252,177 @@ At Method level:
 		SpellChecker SpellChecker = new SpellCheckerImpl(dbUrl, user, timeout);
 		return SpellChecker;
 	}
+If there's conflicting scopes on a type and in a bind() statement, the bind() statement's scope will be used. If a type is annotated with a scope
+that you don't want, bind it to Scopes.NO_SCOPE.
 
+In linked bindings, scopes apply to the binding source, not the binding target.
+These bindings allow for two instances of Applebees type, one for Bars and another for Grills:
+	bind(Bar.class).to(Applebees.class).in(Singleton.class);
+	bind(Grill.class).to(Applebees.class).in(Singleton.class);
+To allow only a single instance to be created, use a @Singleton annotation on the declaration for that class. Or add another binding
+	bind(Applebees.class).in(Singleton.class);
+This binding makes the other two .in(Singleton.class) clauses above unnecessary.
+
+The in() clause accepts either a scoping annotation like RequestScoped.class and also Scope instances like ServletScopes.REQUEST:
+	bind(UserPreferences.class).toProvider(UserPreferencesProvider.class).in(ServletScopes.REQUEST);
+The annotation is preferred because it allows the module to be reused in different types of applications.
+For example, an @RequestScoped object could be scoped to the HTTP request in a web app and to the RPC when it's in an API server.
+
+>>>>>>>
+Eager Singletons
+Guice has special syntax to define singletons that can be constructed eagerly:
+	bind(TransactionLog.class).to(InMemoryTransactionLog.class).asEagerSingleton();
+Eager singletons reveal initialization problems sooner, and ensure end-users get a consistent, snappy experience. Lazy singletons enable a faster
+edit-compile-run development cycle. Use the Stage enum to specify which strategy should be used.
+						PRODUCTION 	DEVELOPMENT
+	.asEagerSingleton()		eager	eager
+	.in(Singleton.class)	eager	lazy
+	.in(Scopes.SINGLETON)	eager	lazy
+	@Singleton				eager*	lazy
+* Guice will only eagerly build singletons for the types it knows about. These are the types mentioned in your modules, plus the transitive
+dependencies of those types.
+
+>>>>>>>
+Choosing a scope
+If the object is stateful, Per-application is @Singleton, per-request is @RequestScoped, etc. If the object is stateless and inexpensive to create,
+scoping is unnecessary. Leave the binding unscoped and Guice will create new instances as they're required.
+
+Singletons are popular in Java applications but they don't provide much value, especially when dependency injection is involved.
+Although singletons save object creation (and later garbage collection), initialization of the singleton requires synchronization;
+getting a handle to the single initialized instance only requires reading a volatile. Singletons are most useful for:
+	stateful objects, such as configuration or counters
+	objects that are expensive to construct or lookup
+	objects that tie up resources, such as a database connection pool.
+
+>>>>>>>
+Scopes and Concurrency
+Classes annotated @Singleton and @SessionScoped must be threadsafe. Everything that's injected into these classes must also be threadsafe.
+Minimize mutability to limit the amount of state that requires concurrency protection.
+
+@RequestScoped objects do not need to be threadsafe. It is usually an error for a @Singleton or @SessionScoped object to depend on an @RequestScoped
+one. Should you require an object in a narrower scope, inject a Provider of that object.
+
+>>>>>>>
+Custom Scopes
+
+Custom scopes can be written for other types of applications.
+It is generally recommended that users do not write their own custom scopes — the built-in scopes should be sufficient for most applications.
+If you're writing a web application, the ServletModule provides simple, well tested scope implementations for HTTP requests and HTTP sessions.
+Creating custom scopes is a multistep process:
+	Define a scoping annotation
+	Implementing the Scope interface
+	Attaching the scope annotation to the implementation
+	Triggering scope entry and exit
+
+>>>>>
+Injections
+
+>>>>>>>
+Constructor Injection
+Constructor injection combines instantiation with injection. To use it, annotate the constructor with the @Inject annotation.
+If your class has no @Inject-annotated constructor, Guice will use a public, no-arguments constructor if it exists.
+
+>>>>>>>
+Method Injection
+Guice can inject methods that have the @Inject annotation. Dependencies take the form of parameters, which the injector resolves before invoking
+the method. Injected methods may have any number of parameters, and the method name does not impact injection.
+Any mathod can be injected, not just get*() and set*();
+
+>>>>>>>
+Field Injection
+Guice injects fields with the @Inject annotation. This is the most concise injection, but the least testable.
+Avoid using field injection with final fields.
+
+>>>>>>>
+Optional injection
+Optional injection means injecting the dependency if exists. Method and Field injections may be optionally dependent and should have
+some default value if dependency is not present.
+
+   private String dbUrl = "jdbc:mysql://localhost:5326/emp";
+   ...
+   @Inject(optional=true)
+   public void setDbUrl(@Named("JDBC") String dbUrl) {
+      this.dbUrl = dbUrl;
+   }
+   
+>>>>>>>
+On-Demand Injection
+Method and field injections can be used to initialize using exiting object using injector.injectMembers() method.
+
+	Injector injector = Guice.createInjector(...);
+    CreditCardProcessor creditCardProcessor = new PayPalCreditCardProcessor();
+	injector.injectMembers(creditCardProcessor);
+
+>>>>>>>
+Static Injections
+It makes it possible for objects to partially participate in dependency injection, by gaining access to injected types without being
+injected themselves. Use requestStaticInjection() in a module to specify classes to be injected at injector-creation time
+
+	@Override public void configure() {
+		requestStaticInjection(ProcessorFactory.class);
+		...
+	}
+	
+	class ProcessorFactory {
+		@Inject static Provider<Processor> processorProvider;
+		
+		/**
+		* @deprecated prefer to inject your processor instead.
+		*/
+		@Deprecated
+		public static Processor getInstance() {
+		return processorProvider.get();
+		}
+	}
+	
+Static members will not be injected at instance-injection time. This API is not recommended for general use
+
+>>>>>>>
+Automatic Injection
+Guice automatically injects all of the following:
+	instances passed to toInstance() in a bind statement
+	provider instances passed to toProvider() in a bind statement The objects will be injected while the injector itself is being created.
+	If they're needed to satisfy other startup injections, Guice will inject them before they're used.
+
+>>>>>>>
+Injecting Provider
+With normal dependency injection, each type gets exactly one instance of each of its dependent types. Sometimes you want more than one instance
+of your dependent types. When this flexibility is necessary, Guice binds a provider.
+Wherever you inject a value you can inject a provider for that value.
+
+	@Inject
+	public RealBillingService(Provider<CreditCardProcessor> processorProvider) {
+		this.processorProvider = processorProvider;
+	}
+For every binding, annotated or not, the injector has a built-in binding for its provider.
+Use providers when you need multiple instances of the same type. If you've got a dependency on a type that is particularly expensive to produce,
+you can use providers to defer that work. This is especially useful when you don't always need the dependency.
+	public void logChargeResult(ChargeResult result) {
+		/* only write failed charges to the database */
+		if (!result.wasSuccessful()) {
+			Connection connection = connectionProvider.get();
+		}
+	}
+It is an error to depend on an object in a narrower scope. Suppose you have a singleton transaction log that needs on the request-scoped current user.
+Should you inject the user directly, things break because the user changes from request to request. Since providers can produce values on-demand,
+they enable you to mix scopes safely.
+	@Singleton
+	public class ConsoleTransactionLog implements TransactionLog {
+	
+	private final AtomicInteger failureCount = new AtomicInteger();
+	private final Provider<User> userProvider;
+	
+	@Inject
+	public ConsoleTransactionLog(Provider<User> userProvider) {
+		this.userProvider = userProvider;
+	}
+	
+	public void logConnectException(UnreachableException e) {
+		failureCount.incrementAndGet();
+		User user = userProvider.get();
+		System.out.println("Connection failed for " + user + ": " + e.getMessage());
+		System.out.println("Failure count: " + failureCount.incrementAndGet());
+	}
 >>>>>
 Guice AOP
 The functions that span multiple points of an application are called cross-cutting concerns and these cross-cutting concerns are
@@ -206,3 +436,27 @@ Important Classes
 						its arguments, and the receiving instance. We can perform cross-cutting logic and then delegate to
 						the underlying method. Finally, we may inspect the return value or exception and return.
 
+>>>>>
+Minimize mutability
+
+Wherever possible, use constructor injection to create immutable objects.
+
+	public class RealPaymentService implements PaymentService { 
+	
+		private final PaymentQueue paymentQueue; 
+		private final Notifier notifier;  
+		
+		@Inject 
+		RealPaymentRequestService(PaymentQueue paymentQueue, Notifier notifier) { 
+			this.paymentQueue = paymentQueue; 
+			this.notifier = notifier; 
+		}
+
+Constructor injection has some limitations:
+	Injected constructors may not be optional.
+	It cannot be used unless objects are created by Guice. This is a dealbreaker for certain frameworks.
+	Subclasses must call super() with all dependencies. This makes constructor injection cumbersome, especially as the injected base class changes.
+
+Method injection is most useful when you need to initialize an instance that is not constructed by Guice.Field injection has the most compact syntax,
+so it shows up frequently on slides and in examples. It is neither encapsulated nor testable.
+Never inject final fields; the JVM doesn't guarantee that the injected value will be visible to all threads.
