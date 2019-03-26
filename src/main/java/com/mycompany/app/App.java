@@ -23,6 +23,12 @@ public class App {
 	// Constants binding, ,bind to instance
 	TextEditorJDBC jdbcTextEditor = injector.getInstance(TextEditorJDBC.class);
 	jdbcTextEditor.makeConection();
+	// creating complex objects using @Provides method
+	TextEditorComplex complexTextEditor = injector.getInstance(TextEditorComplex.class);
+	complexTextEditor.makeSpellCheck();
+	// creating complex objects using Provider class
+	TextEditorComplex2 complexTextEditor2 = injector.getInstance(TextEditorComplex2.class);
+	complexTextEditor2.makeSpellCheck();
 
     }
 }
