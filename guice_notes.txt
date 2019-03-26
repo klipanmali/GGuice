@@ -1,0 +1,12 @@
+This "main" method introduces a fundamental concept of Guice: the Module. The Module is the basic unit of definition of bindings
+(or wiring, as it’s known in Spring).Guice has adopted a code-first approach for dependency injection and management so
+you won’t be dealing with a lot of XML out-of-the-box.
+The dependency tree of Communication will be implicitly injected using a feature called just-in-time binding, provided
+the classes have the default no-arg constructor. This has been a feature in Guice since inception and only available
+in Spring since v4.3.
+Binding is to Guice as wiring is to Spring. With bindings, you define how Guice is going to inject dependencies into a class.
+
+>>>>>
+Guice will implicitly inject some general purpose components like the Injector and an instance of java.util.Logger,
+among others. You’ll notice we are using loggers all through the samples but you won’t find an actual binding for them.
+
