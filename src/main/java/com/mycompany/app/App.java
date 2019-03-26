@@ -46,6 +46,13 @@ public class App {
 	//Optional injection
 	TextEditorOptionalInjection optionalInjrctionTextEditor = injector.getInstance(TextEditorOptionalInjection.class);
 	optionalInjrctionTextEditor.makeSpellCheck();
+	// On demand Injection
+	// in this case this needs to be done first
+	SpellCheckerOnDemandInjection onDemandChecker = new SpellCheckerOnDemandInjection();
+	injector.injectMembers(onDemandChecker);
+	TextEditorOnDemandInjection onDemandInjectTextEditor = injector.getInstance(TextEditorOnDemandInjection.class);
+	onDemandInjectTextEditor.makeSpellCheck();
+	
 	
 
     }

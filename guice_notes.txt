@@ -143,3 +143,7 @@ some default value if dependency is not present.
    public void setDbUrl(@Named("JDBC") String dbUrl) {
       this.dbUrl = dbUrl;
    }
+   
+>>>>>
+On-Demand Injection
+Method and field injections can be used to initialize using exiting object using injector.injectMembers() method.

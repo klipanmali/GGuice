@@ -38,6 +38,7 @@ public class TextEditorModule extends AbstractModule {
 	// @ImplementedBy annotation, No binding is required in Binding Module
 	// @ProvidedBy annotation, similar to Provider class, but doesn't
 	// require binding
+	// On demand Injection, also doesn't require extra binding
     }
 
     // if binding object is a little bit complex
