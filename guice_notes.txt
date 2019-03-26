@@ -394,7 +394,10 @@ Wherever you inject a value you can inject a provider for that value.
 	public RealBillingService(Provider<CreditCardProcessor> processorProvider) {
 		this.processorProvider = processorProvider;
 	}
-For every binding, annotated or not, the injector has a built-in binding for its provider.
+For every dependemcy, annotated or not, the injector has a built-in binding for its provider.
+If you wont custome provider to be injected instread of the default one you need to bind custome provider to type
+	bind(TransactionLogger.class).toProvider(TransactionLogProvider.class);
+	
 Use providers when you need multiple instances of the same type. If you've got a dependency on a type that is particularly expensive to produce,
 you can use providers to defer that work. This is especially useful when you don't always need the dependency.
 	public void logChargeResult(ChargeResult result) {

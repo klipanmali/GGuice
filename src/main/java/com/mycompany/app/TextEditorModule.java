@@ -14,21 +14,21 @@ public class TextEditorModule extends AbstractModule {
 	 */
 	@Override
 	protected void configure() {
-		// this is linked binding
+		// > Linked binding
 		bind(SpellChecker.class).to(SpellCheckerImpl.class);
 		// linked binding too
 		bind(SpellCheckerImpl.class).to(SpellCheckerWinWord.class);
-		// custom annotated binding
+		// > Custom annotated binding
 		bind(SpellChecker.class).annotatedWith(WinWord.class).to(SpellCheckerWinWord.class);
-		// @Named annotated binding
+		// > @Named annotated binding
 		bind(SpellChecker.class).annotatedWith(Names.named("OpenOffice")).to(SpellCheckerOpenOfficeWord.class);
-		// Constants binding, bind to instance
+		// > Constants binding, bind to instance
 		bind(String.class).annotatedWith(Names.named("JDBC")).toInstance("jdbc:mysql://localhost:5326/emp");
-		// bind to instance, this is possible too
+		// > Bind to instance, this is possible too
 		// You should limit the use of this mode where there isn’t any heavy
 		// initialization or dependency injection necessary.
 		// bind(SpellChecker.class).toInstance(new SpellCheckerWinWord());
-		// binding to Provider class
+		// > Binding to Provider class
 		bind(SpellCheckerComplex2.class).toProvider(SpellCheckerComplex2Provider.class);
 		// binding to the constructor
 		try {
@@ -37,23 +37,26 @@ public class TextEditorModule extends AbstractModule {
 		} catch (NoSuchMethodException | SecurityException e) {
 			System.out.println("Required constructor missing");
 		}
-		// Constants binding, bind to instance
+		// > Constants binding, bind to instance
 		bind(String.class).annotatedWith(Names.named("JDBCcons")).toInstance("jdbc:mysql://localhost:53266/emp");
 		bind(String.class).annotatedWith(Names.named("un")).toInstance("PajoPatak");
-		// @ImplementedBy annotation, No binding is required in Binding Module
-		// @ProvidedBy annotation, similar to Provider class, but doesn't
+		// > @ImplementedBy annotation, No binding is required in Binding Module
+		// > @ProvidedBy annotation, similar to Provider class, but doesn't
 		// require binding
-		// On demand Injection, also doesn't require extra binding
-		// Inject Providers
+		// > On demand Injection, also doesn't require extra binding
+		// > Inject Providers
 		// If you want to inject custom provider instead of the default one, you need to
 		// bind it to type
 		bind(TransactionLogger.class).toProvider(TransactionLogProvider.class);
-		// Guice AOP
+		bind(MyClass.class).annotatedWith(Names.named("CustomeProvider")).toProvider(MyClassCustomeProvider.class);
+		// > Guice AOP
 		// need two matchers: one to define which classes participate, and another for
 		// the methods of those classes
 		bindInterceptor(Matchers.any(), Matchers.annotatedWith(CallTracker.class), new CallTrackingService());
 	}
 
+	// >Bind to @Provider method
+	// NO extra binding in Module is necessary
 	// if binding object is a little bit complex
 	@Provides
 	public SpellCheckerComplex provideSpellCheckerComoplex() {

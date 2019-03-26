@@ -3,6 +3,8 @@ package com.mycompany.app;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import junit.framework.Assert;
+
 /**
  * Hello world!
  *
@@ -61,6 +63,9 @@ public class App {
 		// Injecting Providers
 		BillingService billingService = injector.getInstance(RealBillingService.class);
 		billingService.chargeOrder("Fungi pizza", "3653653654");
+		// Injecting custome Proiders
+		MyClassUser myClassUser = injector.getInstance(MyClassUser.class);
+		Assert.assertTrue(myClassUser.get().myProvider);
 		// Guice AOP
 		TextEditorAOP aopTextEditor = injector.getInstance(TextEditorAOP.class);
 		aopTextEditor.makeSpellCheck();
