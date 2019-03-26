@@ -12,6 +12,7 @@ public class TextEditorComplex2 {
     }
 
     public void makeSpellCheck() {
+	System.out.println(">>>> Creating complex objects using Provider class");
 	spellChecker.checkSpelling();
     }
 

@@ -12,6 +12,7 @@ public class TextEditorConstructor {
     }
 
     public void makeSpellCheck() {
+	System.out.println(">>>> Create bindings with specific constructor of an object");
 	spellChecker.checkSpelling();
     }
 

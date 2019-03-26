@@ -8,7 +8,9 @@ public class SpellCheckerComplex implements SpellChecker {
     private String user;
     private int timeout;
 
-    @Inject
+    @Inject // do I need this annotation here ???
+	    // in my case not really, since @Provides annotated method provides
+	    // instance of this class
     public SpellCheckerComplex(String dbUrl, String user, int timeout) {
 	this.dbUrl = dbUrl;
 	this.user = user;

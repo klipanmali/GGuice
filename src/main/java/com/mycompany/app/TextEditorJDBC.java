@@ -12,6 +12,7 @@ public class TextEditorJDBC {
     }
 
     public void makeConection() {
+	System.out.println(">>>> Constants binding, ,bind to instance");
 	System.out.println("connectin DB to: " + dbUrl);
 
     }

@@ -1,12 +1,124 @@
 This "main" method introduces a fundamental concept of Guice: the Module. The Module is the basic unit of definition of bindings
 (or wiring, as it’s known in Spring).Guice has adopted a code-first approach for dependency injection and management so
 you won’t be dealing with a lot of XML out-of-the-box.
+
+Dependency Injection is controlled by the Guice Bindings. Guice uses bindings to map object types to their actual implementations.
+These bindings are defined a module. A module is a collection of bindings.
+The Module is the core building block for an Injector which is Guice's object-graph builder. First step is to create an injector
+and then we can use the injector to get the objects.
+
 The dependency tree of Communication will be implicitly injected using a feature called just-in-time binding, provided
 the classes have the default no-arg constructor. This has been a feature in Guice since inception and only available
 in Spring since v4.3.
 Binding is to Guice as wiring is to Spring. With bindings, you define how Guice is going to inject dependencies into a class.
 
 >>>>>
-Guice will implicitly inject some general purpose components like the Injector and an instance of java.util.Logger,
-among others. You’ll notice we are using loggers all through the samples but you won’t find an actual binding for them.
+In Linked bindings, Guice maps a type to its implementation.
+bind(SpellChecker.class).to(SpellCheckerImpl.class);
+and than 
+@Inject
+public TextEditor(SpellChecker spellChecker) {
+	....
+}
 
+In case we want to map a type with multiple implementations, we can create custom annotation as well.
+@BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
+@interface WinWord {}
+and than 
+bind(SpellChecker.class).annotatedWith(WinWord.class).to(WinWordSpellCheckerImpl.class);
+and than
+@Inject
+public TextEditor(@WinWord SpellChecker spellChecker) {
+	.....
+}
+
+Guice provides another way also to map bindings without creating a custom annotation. It allows so using @Named annotation.
+bind(SpellChecker.class).annotatedWith(Names.named("OpenOffice")).to(OpenOfficeWordSpellCheckerImpl.class);
+and than
+@Inject
+public TextEditor(@Named("OpenOffice") SpellChecker spellChecker) {
+   .....
+}
+
+Guice provides a way to create bindings with value objects or constants.
+bind(String.class).annotatedWith(Names.named("JBDC")).toInstance("jdbc:mysql://localhost:5326/emp");
+and than 
+@Inject
+public void connectDatabase(@Named("JBDC") String dbUrl) {
+   //...
+}
+
+Guice provides a way to create bindings with complex objects using @provides annotated method.
+This method is being part of Binding Module and provides the complex object to be mapped.
+@Provides
+public SpellChecker provideSpellChecker() {
+   //.....
+   return spellChecker;
+}
+and than 
+@Inject
+public TextEditor(SpellChecker spellChecker) {
+	//....
+}
+
+As @provides method becomes more complex, these methods can be moved to separate classes using Provider interface.
+class SpellCheckerProvider implements Provider<SpellChecker> {
+   @Override
+   public SpellChecker get() {
+      //......
+      return SpellChecker;
+   } 
+}
+and than 
+bind(SpellChecker.class).toProvider(SpellCheckerProvider.class);
+and than
+@Inject
+public TextEditor(SpellChecker spellChecker) {
+	//....
+}
+
+Guice provides a way to create bindings with specific constructor of an object using toConstructor() method.
+//Binding Module
+@Override
+protected void configure() {
+   try {
+      bind(SpellChecker.class)
+         .toConstructor(SpellCheckerImpl.class.getConstructor(String.class));
+   } catch (NoSuchMethodException | SecurityException e) {
+      System.out.println("Required constructor missing");
+   } 
+   bind(String.class)
+      .annotatedWith(Names.named("JDBC"))
+      .toInstance("jdbc:mysql://localhost:5326/emp");
+}
+and than
+public SpellCheckerImpl(@Named("JDBC") String dbUrl) {
+   this.dbUrl = dbUrl;
+}
+and than
+@Inject
+public TextEditor( SpellChecker spellChecker) {
+   this.spellChecker = spellChecker;
+}
+
+Guice will implicitly inject some general purpose components like the Injector and an instance of java.util.Logger,
+among others. Guice provides inbuilt binding for java.util.logging.Logger class. Logger's name is automatically set
+to the name of the class into which the Logger is injected.
+@Inject
+public TextEditor( Logger logger) {
+   this.logger = logger;
+}
+and than, actually nathing since guice provides inbuild binding to Logger class
+
+>>>>>
+In other to create instance of the class, Guice will use @Inject annotated constructor. There can be one and only one
+@Inject annotated constructor. if there is no @Inject annotated constructor, default empty constructor is used.
+
+>>>>>
+As bindings are defined in Binding Module, Guice uses them whenever it needs to inject dependencies. In case bindings are not
+present, it can attempt to create just-in-time bindings. Bindings present in binding module are called explicit bindings
+and are of higher precedence whereas just-in-time bindings are called implicit bindings. If both type of bindings are present,
+explicit bindings are considered for mapping.
+
+Non-private, No-argument constructors are eligible for just-in-time bindings. Another way is to annotate a constructor with
+@Inject annotation.

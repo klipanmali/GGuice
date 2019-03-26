@@ -12,6 +12,7 @@ public class TextEditor {
     }
 
     public void performSpellCheck() {
+	System.out.println(">>>> Linked binding");
 	spellingChecker.checkSpelling();
     }
 

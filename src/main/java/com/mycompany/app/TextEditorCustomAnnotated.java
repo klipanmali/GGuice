@@ -13,6 +13,7 @@ public class TextEditorCustomAnnotated {
     }
 
     public void performSpellCheck() {
+	System.out.println(">>>> Custome annotated binding");
 	spellingChecker.checkSpelling();
     }
 

@@ -11,6 +11,7 @@ public class TextEditorComplex {
     }
 
     public void makeSpellCheck() {
+	System.out.println(">>>> Creating complex objects using @Provides method");
 	spellChecker.checkSpelling();
     }
 

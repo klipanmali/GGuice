@@ -18,6 +18,7 @@ public class TextEditorLogger {
     }
 
     public void makeSpellCheck() {
+	System.out.println(">>>> Inbuilt Bindings, Logger");
 	logger.info("In TextEditorLogger.makeSpellCeck() method");
     }
 

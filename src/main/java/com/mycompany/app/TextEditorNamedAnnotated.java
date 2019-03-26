@@ -14,6 +14,7 @@ public class TextEditorNamedAnnotated {
     }
 
     public void performSpellCheck() {
+	System.out.println(">>>> @Named annotated binding");
 	spellingChecker.checkSpelling();
     }
 

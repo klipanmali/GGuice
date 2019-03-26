@@ -29,6 +29,7 @@ public class App {
 	// creating complex objects using Provider class
 	TextEditorComplex2 complexTextEditor2 = injector.getInstance(TextEditorComplex2.class);
 	complexTextEditor2.makeSpellCheck();
+	// Create bindings with specific constructor of an object
 	TextEditorConstructor constructorTextEditor = injector.getInstance(TextEditorConstructor.class);
 	constructorTextEditor.makeSpellCheck();
 	// Inbuilt Bindings, Logger is automatically bind to
