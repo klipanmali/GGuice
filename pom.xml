@@ -43,6 +43,6 @@
 		<groupId>com.google.inject.extensions</groupId>
 		<artifactId>guice-assistedinject</artifactId>
 		<version>4.0</version>
-	</dependency>
+	</dependency>	
   </dependencies>
 </project>
