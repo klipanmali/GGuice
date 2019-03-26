@@ -1,14 +1,14 @@
 package com.mycompany.app.customescope;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 public class School {
 
-	private Set<Pupil> pupilClass = new HashSet<>();
+	private List<Pupil> pupilClass = new ArrayList<>();
 
 	@Override
 	public String toString() {
@@ -28,14 +28,17 @@ public class School {
 
 		Injector injector = Guice.createInjector(new MyModule());
 		School school = injector.getInstance(School.class);
+		ScopeControler scopeControler = injector.getInstance(ScopeControler.class);
+		new Thread(scopeControler).start();
 
-		for (int i = 0; i < 10; i++) {
-			school.addPupil(injector.getInstance(Pupil.class));
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+		try {
+			for (int i = 0; i < 10; i++) {
+				Thread.sleep(18000);
+				school.addPupil(injector.getInstance(Pupil.class));
 			}
+		} catch (InterruptedException e) {
+			System.out.println("Maint thread interrupted");
+			e.printStackTrace();
 		}
 
 		System.out.println(school);

@@ -1,4 +1,4 @@
-Injection is a process of injecting dependency into an object.
+﻿Injection is a process of injecting dependency into an object.
 The dependency injection pattern separates behaviour from dependency resolution. Rather than looking up dependencies directly or from factories,
 the pattern recommends that dependencies are passed in. The process of setting dependencies into an object is called injection.
 
@@ -20,14 +20,14 @@ Guice forbids null by default. It will refuse to inject null, failing with a Pro
 you can annotate the field or parameter with @Nullable. Guice recognizes any @Nullable annotation, like
 edu.umd.cs.findbugs.annotations.Nullable or javax.annotation.Nullable.
 
+SINGLETON Scope means one instance per Injector
+
 The full power of the Java language comes at a cost: it's easy to do too much in a module. It's tempting to connect to a database connection
 or to start an HTTP server in your Guice module. Don't do this!
     Modules start up, but they don't shut down. Should you open a database connection in your module, you won't have any hook to close it.
     Modules should be tested. If a module opens a database as a course of execution, it becomes difficult to write unit tests for it.
     Modules can be overridden. Guice modules support overrides, allowing a production service to be substituted with a lightweight or test one.
 		When the production service is created as a part of module execution, such overrides are ineffective.
-
-SINGLETON Scope means one instance per Injector
 
 Rather than doing work in the module itself, define an interface that can do the work at the proper level of abstraction. In our applications
 we use this interface:
@@ -81,6 +81,7 @@ InMemoryFooService is used for development and RemoteFooService is used in produ
 to be sure that RemoteFooService works in the integrated application.
 If you split production and development into distinct modules, it is easier to be sure that the entire production codepath is tested.
 In this case, we split FooModule into RemoteFooModule and InMemoryFooModule.
+
 >>>>>
 Linked bindings
 In Linked bindings, Guice maps a type to its implementation.
@@ -114,7 +115,7 @@ and than
 	}
 also for Field 
 	@Inject @Left Leg leftLeg;
-    @Inject @Right Leg rightLeg;
+	@Inject @Right Leg rightLeg;
 
 If you do decide to manually create a custom implementation of binding annotation with attribute values(similar to @Named annotation),
 be sure to properly implement the equals() and hashCode() specifications detailed in the Annotation Javadoc.
@@ -391,6 +392,7 @@ If you're writing a web application, the ServletModule provides simple, well tes
 Creating custom scopes is a multistep process:
 	Define a scoping annotation
 	Implementing the Scope interface
+		Scope implementing class actually provides Provider for each Type anotated with Scope Annotataion
 	Attaching the scope annotation to the implementation
 	Triggering scope entry and exit
 

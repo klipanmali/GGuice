@@ -1,15 +1,15 @@
 package com.mycompany.app.customescope;
 
-import com.google.inject.Inject;
-
 public class Uniform {
 
 	private ClassColor color;
 
-	@Inject
-	public Uniform(String color) {
-		super();
-		this.color = ClassColor.getColor();
+	public Uniform() {
+		this.color = ClassColor.getRandomColor();
+	}
+
+	public Uniform(ClassColor color) {
+		this.color = color;
 	}
 
 	@Override

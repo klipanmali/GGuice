@@ -1,14 +1,15 @@
 package com.mycompany.app.customescope;
 
-import com.google.inject.Inject;
-
 public class Accessorie {
 
 	private ClassColor color;
 
-	@Inject
-	public Accessorie(String color) {
-		this.color = ClassColor.getColor();
+	public Accessorie() {
+		this.color = ClassColor.getRandomColor();
+	}
+
+	public Accessorie(ClassColor color) {
+		this.color = color;
 	}
 
 	@Override

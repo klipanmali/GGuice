@@ -12,7 +12,7 @@ public enum ClassColor {
 		this.color = color;
 	}
 
-	public static ClassColor getColor() {
+	public static ClassColor getRandomColor() {
 		Random rnd = new Random();
 		int color = rnd.nextInt(4);
 		switch (color) {
