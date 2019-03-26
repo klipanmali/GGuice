@@ -131,3 +131,15 @@ in such a case.
 >>>>>
 @ProvidedBy annotation tells the guice about the provider of implementation class. No binding is required in Binding Module
 in such a case.
+
+>>>>>
+Optional injection
+Optional injection means injecting the dependency if exists. Method and Field injections may be optionally dependent and should have
+some default value if dependency is not present.
+
+   private String dbUrl = "jdbc:mysql://localhost:5326/emp";
+   ...
+   @Inject(optional=true)
+   public void setDbUrl(@Named("JDBC") String dbUrl) {
+      this.dbUrl = dbUrl;
+   }

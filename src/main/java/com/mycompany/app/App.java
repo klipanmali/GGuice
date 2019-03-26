@@ -43,6 +43,9 @@ public class App {
 	//Field injection
 	TextEditorField methodTextField = injector.getInstance(TextEditorField.class);
 	methodTextField.makeSpellCheck();
+	//Optional injection
+	TextEditorOptionalInjection optionalInjrctionTextEditor = injector.getInstance(TextEditorOptionalInjection.class);
+	optionalInjrctionTextEditor.makeSpellCheck();
 	
 
     }
