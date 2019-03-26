@@ -1,6 +1,6 @@
 package com.mycompany.app;
 
-public class OpenOfficeWordSpellCheckerImpl extends SpellCheckerImpl {
+public class SpellCheckerOpenOfficeWord extends SpellCheckerImpl {
 
     /*
      * (non-Javadoc)

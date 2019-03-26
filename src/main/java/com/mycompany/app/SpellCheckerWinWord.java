@@ -1,6 +1,6 @@
 package com.mycompany.app;
 
-public class WinWordSpellCheckerImpl extends SpellCheckerImpl {
+public class SpellCheckerWinWord extends SpellCheckerImpl {
 
     /*
      * (non-Javadoc)

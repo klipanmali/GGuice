@@ -16,15 +16,23 @@ public class TextEditorModule extends AbstractModule {
 	// this is linked binding
 	bind(SpellChecker.class).to(SpellCheckerImpl.class);
 	// linked binding too
-	bind(SpellCheckerImpl.class).to(WinWordSpellCheckerImpl.class);
+	bind(SpellCheckerImpl.class).to(SpellCheckerWinWord.class);
 	// custom annotated binding
-	bind(SpellChecker.class).annotatedWith(WinWord.class).to(WinWordSpellCheckerImpl.class);
+	bind(SpellChecker.class).annotatedWith(WinWord.class).to(SpellCheckerWinWord.class);
 	// @Named annotated binding
-	bind(SpellChecker.class).annotatedWith(Names.named("OpenOffice")).to(OpenOfficeWordSpellCheckerImpl.class);
+	bind(SpellChecker.class).annotatedWith(Names.named("OpenOffice")).to(SpellCheckerOpenOfficeWord.class);
 	// Constants binding, bind to instance
 	bind(String.class).annotatedWith(Names.named("JDBC")).toInstance("jdbc:mysql://localhost:5326/emp");
 	// binding to Provider class
 	bind(SpellCheckerComplex2.class).toProvider(SpellCheckerComplex2Provider.class);
+	// binding to the constructor
+	try {
+	    bind(SpellCheckerConstructor.class)
+		    .toConstructor(SpellCheckerConstructor.class.getConstructor(String.class));
+	} catch (NoSuchMethodException | SecurityException e) {
+	    System.out.println("Required constructor missing");
+	}
+	bind(String.class).annotatedWith(Names.named("JDBCcons")).toInstance("jdbc:mysql://localhost:53266/emp");
 
     }
 

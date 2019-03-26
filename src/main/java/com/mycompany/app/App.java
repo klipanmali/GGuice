@@ -29,6 +29,8 @@ public class App {
 	// creating complex objects using Provider class
 	TextEditorComplex2 complexTextEditor2 = injector.getInstance(TextEditorComplex2.class);
 	complexTextEditor2.makeSpellCheck();
+	TextEditorConstructor constructorTextEditor = injector.getInstance(TextEditorConstructor.class);
+	constructorTextEditor.makeSpellCheck();
 
     }
 }
