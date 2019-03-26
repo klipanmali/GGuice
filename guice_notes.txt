@@ -538,6 +538,86 @@ Foot.class and Leg.class, and exposes a binding for the annotated Leg.class:
 	}
 
 >>>>>
+Assisted Injection
+Factories are a well established pattern for creating value objects, model/domain objects (entities), or objects that combine parameterization
+and dependencies. Factories can be brittle and contain a lot of boilerplate. Guice can eliminate a lot of that boilerplate by auto-generating
+Factory implementations from simple interfaces.
+	Annotate the constructor and assisted parameters on the implementation class 
+	Create a factory interface with a create() method that takes only the assisted parameters.
+		Make sure they're in the same order as in the constructor
+		(You can name your factory methods whatever you like, such as create, createPayment or newPayment.)
+	Bind that factory to a provider created by AssistedInject
+If the factory contains many methods that return the same type, you can create multiple constructors in your concrete class,
+each constructor marked with with @AssistedInject, in order to match the different parameters types of the factory methods.
+Complex factories
+Factories can create an arbitrary number of objects, one per each method. Each factory method can be configured using .implement. 
+	public interface OrderFactory {
+		Payment create(Date startDate, Money amount);
+		Shipment create(Customer customer, Item item);
+		Receipt create(Payment payment, Shipment shipment);
+	}
+	...
+	install(new FactoryModuleBuilder()
+		.implement(Payment.class, RealPayment.class)
+		// excluding .implement for Shipment means the implementation class
+		// will be 'Shipment' itself, which is legal if it's not an interface.
+		.implement(Receipt.class, RealReceipt.class)
+		.build(OrderFactory.class));
+Inject your factory into your application classes.
+	public class PaymentAction {
+	@Inject private PaymentFactory paymentFactory;
+	
+	public void doPayment(Money amount) {
+			Payment payment = paymentFactory.create(new Date(), amount);
+			payment.apply();
+		}
+	}
+Making parameter types distinct
+The types of the factory method's parameters must be distinct. To use multiple parameters of the same type, use a named @Assisted annotation
+to disambiguate the parameters.
+	public interface PaymentFactory {
+		Payment create(
+			@Assisted("startDate") Date startDate,
+			@Assisted("dueDate") Date dueDate,
+			Money amount);
+	} 
+	...
+	@Inject
+	public RealPayment(
+	CreditService creditService,
+	AuthService authService,
+		@Assisted("startDate") Date startDate,
+		@Assisted("dueDate") Date dueDate,
+		@Assisted Money amount) {
+	...
+	}
+
+If you just want to return the types specified in the factory, do not configure any implementations:
+	public interface FruitFactory {
+		Apple getApple(Color color);
+	}
+	...
+	protected void configure() {
+		install(new FactoryModuleBuilder().build(FruitFactory.class));
+	}
+Note that any type returned by the factory in this manner needs to be an implementation class.
+To return two different implementations for the same interface from your factory, use binding annotations on your return types:
+	interface CarFactory {
+		@Named("fast") Car getFastCar(Color color);
+		@Named("clean") Car getCleanCar(Color color);
+	}
+	...
+	protected void configure() {
+	install(new FactoryModuleBuilder()
+		.implement(Car.class, Names.named("fast"), Porsche.class)
+		.implement(Car.class, Names.named("clean"), Prius.class)
+		.build(CarFactory.class));
+	}
+
+Implementation limitations
+As a limitation of the implementation, it is prohibited to declare a factory method that accepts a Provider as one of its arguments.
+
+>>>>>
 Guice AOP
 The functions that span multiple points of an application are called cross-cutting concerns and these cross-cutting concerns are
 conceptually separate from the application's business logic.
