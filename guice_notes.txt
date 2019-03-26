@@ -27,6 +27,8 @@ or to start an HTTP server in your Guice module. Don't do this!
     Modules can be overridden. Guice modules support overrides, allowing a production service to be substituted with a lightweight or test one.
 		When the production service is created as a part of module execution, such overrides are ineffective.
 
+SINGLETON Scope means one instance per Injector
+
 Rather than doing work in the module itself, define an interface that can do the work at the proper level of abstraction. In our applications
 we use this interface:
 	public interface Service {
@@ -123,6 +125,10 @@ Instance binding
 Guice provides a way to create bindings with value objects or constants.
 	bind(String.class).annotatedWith(Names.named("JBDC")).toInstance("jdbc:mysql://localhost:5326/emp");
 	bind(Foot.class).toInstance(new Foot("leftie"));
+	SimpleScope batchScope = new SimpleScope();
+	bind(SimpleScope.class)
+        .annotatedWith(Names.named("batchScope"))
+        .toInstance(batchScope);
 and than 
 	@Inject
 	public void connectDatabase(@Named("JBDC") String dbUrl) {
@@ -705,6 +711,20 @@ or use Binder.getProvider
 Use caution when injecting interceptors. If your interceptor calls a method that it itself is intercepting,
 you may receive a StackOverflowException due to unending recursion.
 
+>>>>>
+ThrowingProviders
+
+Guice isn't very good at handling exceptions that occur during provision.
+    Implementers of Provider can only throw RuntimeExceptions.
+    Callers of Provider can't catch the exception they threw, because it may be wrapped in a ProvisionException.
+    Injecting an instance directly rather than a Provider can cause creation of the injected object to fail.
+    Exceptions cannot be advertised in the API.
+The ThrowingProviders extension offers an alternative to Providers that allow a checked exception to be thrown.
+    API consistent with Provider.
+    Scopable
+    Standard binding DSL
+Guice 2.0 offers the ThrowingProvider interface. It is similar to Provider, but with a generic Exception type.
+Guice 3.0 offers the CheckedProvider interface. It improves upon ThrowingProvider by allowing more than one exception type to be thrown.
 >>>>>
 Minimize mutability
 
