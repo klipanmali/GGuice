@@ -110,6 +110,9 @@ and than
 	public TextEditor(@Named("OpenOffice") SpellChecker spellChecker) {
 	.....
 	}
+also for Field 
+	@Inject @Left Leg leftLeg;
+    @Inject @Right Leg rightLeg;
 
 If you do decide to manually create a custom implementation of binding annotation with attribute values(similar to @Named annotation),
 be sure to properly implement the equals() and hashCode() specifications detailed in the Annotation Javadoc.
@@ -119,6 +122,7 @@ Pass an instance of this class to the annotatedWith() binding clause.
 Instance binding
 Guice provides a way to create bindings with value objects or constants.
 	bind(String.class).annotatedWith(Names.named("JBDC")).toInstance("jdbc:mysql://localhost:5326/emp");
+	bind(Foot.class).toInstance(new Foot("leftie"));
 and than 
 	@Inject
 	public void connectDatabase(@Named("JBDC") String dbUrl) {
@@ -132,6 +136,13 @@ of this mode where there isn’t any heavy initialization or dependency injectio
 One should avoid using .toInstance with objects that are complicated to create, since it can slow down application startup.
 You can use an @Provides method instead.
 
+>>>>>
+Constant binding
+	@Override public void configure() {
+		bindConstant().annotatedWith(FooServerAddress.class).to(fooServerAddress);
+How do I load configuration properties?
+	Use Names.bindProperties() to create bindings for each of the properties in a configuration file.
+	
 >>>>>
 Provider methods binding
 Guice provides a way to create bindings with complex objects using @provides annotated method.
@@ -489,6 +500,43 @@ they enable you to mix scopes safely.
 		System.out.println("Connection failed for " + user + ": " + e.getMessage());
 		System.out.println("Failure count: " + failureCount.incrementAndGet());
 	}
+	
+>>>>>
+Private Modules
+How do I build two similar but slightly different trees of objects?
+There's a PrivateModules solution. It uses two separate private modules, a @Left one and an @Right one. Each has a binding for the unannotated
+Foot.class and Leg.class, and exposes a binding for the annotated Leg.class:
+	class LegModule extends PrivateModule {
+		private final Class<? extends Annotation> annotation;
+		
+		LegModule(Class<? extends Annotation> annotation) {
+			this.annotation = annotation;
+		}
+		
+		@Override protected void configure() {
+			bind(Leg.class).annotatedWith(annotation).to(Leg.class);
+			expose(Leg.class).annotatedWith(annotation);
+			bindFoot();
+		}
+		
+		abstract void bindFoot();
+	}
+
+	public static void main(String[] args) {
+		Injector injector = Guice.createInjector(
+			new LegModule(Left.class) {
+				@Override void bindFoot() {
+					bind(Foot.class).toInstance(new Foot("leftie"));
+				}
+			},
+			new LegModule(Right.class) {
+				@Override void bindFoot() {
+					bind(Foot.class).toInstance(new Foot("righty"));
+				}
+			}
+		);
+	}
+
 >>>>>
 Guice AOP
 The functions that span multiple points of an application are called cross-cutting concerns and these cross-cutting concerns are
