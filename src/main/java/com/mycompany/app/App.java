@@ -37,6 +37,9 @@ public class App {
 	// No extra binding in Module is neccesaary
 	TextEditorLogger loggerTxtEditor = injector.getInstance(TextEditorLogger.class);
 	loggerTxtEditor.makeSpellCheck();
+	// Method Injection
+	TextEditorMethod methodTextEditor = injector.getInstance(TextEditorMethod.class);
+	methodTextEditor.makeSpellCheck();
 
     }
 }

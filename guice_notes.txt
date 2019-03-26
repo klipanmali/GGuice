@@ -1,3 +1,4 @@
+Injection is a process of injecting dependency into an object.
 This "main" method introduces a fundamental concept of Guice: the Module. The Module is the basic unit of definition of bindings
 (or wiring, as it’s known in Spring).Guice has adopted a code-first approach for dependency injection and management so
 you won’t be dealing with a lot of XML out-of-the-box.
