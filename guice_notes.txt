@@ -147,3 +147,27 @@ some default value if dependency is not present.
 >>>>>
 On-Demand Injection
 Method and field injections can be used to initialize using exiting object using injector.injectMembers() method.
+
+>>>>>
+Guice returns a new instance every time when it supplies a value as its default behavior.
+This is configurable via scopes. Following are the built in scopes that Guice supports :
+@Singleton
+@SessionScope
+@RequestScope
+
+Ways to apply scope:
+At class level:
+	@Singleton
+	class SpellCheckerImpl implements SpellChecker {
+		....
+	}
+At configuration level:
+	bind(SpellChecker.class).to(SpellCheckerImpl.class).in(Singleton.class);
+At Method level:
+	@Provides @Singleton
+	public SpellChecker provideSpellChecker() {
+		....
+		SpellChecker SpellChecker = new SpellCheckerImpl(dbUrl, user, timeout);
+		return SpellChecker;
+	}
+

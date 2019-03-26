@@ -52,6 +52,12 @@ public class App {
 	injector.injectMembers(onDemandChecker);
 	TextEditorOnDemandInjection onDemandInjectTextEditor = injector.getInstance(TextEditorOnDemandInjection.class);
 	onDemandInjectTextEditor.makeSpellCheck();
+	//Guice Injection, Singleton scope
+	TextEditorScoped singletonScopeTextEditor = injector.getInstance(TextEditorScoped.class);
+	singletonScopeTextEditor.makeSpellCheck();
+	TextEditorScoped anotherSingletonScopeTextEditor = injector.getInstance(TextEditorScoped.class);
+	anotherSingletonScopeTextEditor.makeSpellCheck();
+	
 	
 	
 
