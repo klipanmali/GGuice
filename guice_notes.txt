@@ -618,6 +618,53 @@ Implementation limitations
 As a limitation of the implementation, it is prohibited to declare a factory method that accepts a Provider as one of its arguments.
 
 >>>>>
+Multibindings
+Multibindings make it easy to support plugins in your application.
+"Multibinder" and "MapBinder" are intended for plugin-type architectures, where you've got several modules contributing Servlets, Actions, Filters,
+Components or even just names.
+Any module can create a new Multibinder to contribute bindings to a set of implementations.
+First, define an interface that plugin authors can implement.
+	interface UriSummarizer {
+		String summarize(URI uri);
+	}
+get plugin authors to implement the interface
+	class FlickrPhotoSummarizer implements UriSummarizer {
+		public String summarize(URI uri) {
+			//.... implementation
+		}
+	}
+register that implementation using a multibinder
+	public class FlickrPluginModule extends AbstractModule {
+		public void configure() {
+			Multibinder<UriSummarizer> uriBinder = Multibinder.newSetBinder(binder(), UriSummarizer.class);
+			uriBinder.addBinding().to(FlickrPhotoSummarizer.class);
+			
+			... // bind plugin dependencies, such as our Flickr API key
+		}
+	}
+and application at the end
+	public class TweetPrettifier {
+	
+		private final Set<UriSummarizer> summarizers;
+		private final EmoticonImagifier emoticonImagifier;
+		
+		@Inject TweetPrettifier(Set<UriSummarizer> summarizers,
+			EmoticonImagifier emoticonImagifier) {
+			this.summarizers = summarizers;
+			this.emoticonImagifier = emoticonImagifier;
+		}
+			
+		public String prettifyUri(URI uri) {
+			// loop through the implementations, looking for one that supports this URI
+			for (UrlSummarizer summarizer : summarizers) {
+				//... some implementation here
+			}		
+			// no summarizer found, just return the URI itself
+			return uri.toString();
+		}
+	}
+	
+>>>>>
 Guice AOP
 The functions that span multiple points of an application are called cross-cutting concerns and these cross-cutting concerns are
 conceptually separate from the application's business logic.
