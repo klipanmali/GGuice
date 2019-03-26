@@ -14,6 +14,7 @@ in Spring since v4.3.
 Binding is to Guice as wiring is to Spring. With bindings, you define how Guice is going to inject dependencies into a class.
 
 >>>>>
+Linked bindings
 In Linked bindings, Guice maps a type to its implementation.
 bind(SpellChecker.class).to(SpellCheckerImpl.class);
 and than 
@@ -41,6 +42,8 @@ public TextEditor(@Named("OpenOffice") SpellChecker spellChecker) {
    .....
 }
 
+>>>>>
+Instance binding
 Guice provides a way to create bindings with value objects or constants.
 bind(String.class).annotatedWith(Names.named("JBDC")).toInstance("jdbc:mysql://localhost:5326/emp");
 and than 
@@ -49,6 +52,15 @@ public void connectDatabase(@Named("JBDC") String dbUrl) {
    //...
 }
 
+bind(SpellChecker.class).toInstance(new SpellCheckerWinWord());
+This binding will provide an instance of the SpellCheckerWinWord class wherever a SpellChecker variable is declared.
+In this case, however, the dependency tree of the class will not be automatically wired. You should limit the use
+of this mode where there isn’t any heavy initialization or dependency injection necessary.
+One should avoid using .toInstance with objects that are complicated to create, since it can slow down application startup.
+You can use an @Provides method instead.
+
+>>>>>
+Provider methods binding
 Guice provides a way to create bindings with complex objects using @provides annotated method.
 This method is being part of Binding Module and provides the complex object to be mapped.
 @Provides
@@ -62,6 +74,16 @@ public TextEditor(SpellChecker spellChecker) {
 	//....
 }
 
+bind(MessageService.class).annotatedWith(Email.class).to(EmailService.class);
+is same as
+@Provides
+@Email
+public MessageService provideMessageService() {
+  return new EmailService();
+}
+ 
+>>>>>
+Provider class binding
 As @provides method becomes more complex, these methods can be moved to separate classes using Provider interface.
 class SpellCheckerProvider implements Provider<SpellChecker> {
    @Override
