@@ -40,6 +40,10 @@ public class App {
 	// Method Injection
 	TextEditorMethod methodTextEditor = injector.getInstance(TextEditorMethod.class);
 	methodTextEditor.makeSpellCheck();
+	//Field injection
+	TextEditorField methodTextField = injector.getInstance(TextEditorField.class);
+	methodTextField.makeSpellCheck();
+	
 
     }
 }
