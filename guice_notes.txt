@@ -727,6 +727,36 @@ The ThrowingProviders extension offers an alternative to Providers that allow a 
     Standard binding DSL
 Guice 2.0 offers the ThrowingProvider interface. It is similar to Provider, but with a generic Exception type.
 Guice 3.0 offers the CheckedProvider interface. It improves upon ThrowingProvider by allowing more than one exception type to be thrown.
+
+>>>>>
+Perssistence/JPA/Transactional
+
+A unit of work is roughly the lifespan of an EntityManager (in JPA). It is the session referred to in the session-per-* strategies.
+We have so far seen how to create a unit of work that spans a single transaction
+and one that spans an entire HTTP request.
+Sometimes you need to define a custom unit-of-work that doesn't fit into either requests or transactions. For example, you may want to do
+some background work in a timer thread, or some initialization work during startup. Or perhaps you are making a desktop app and have some other
+idea of a unit of work.
+To start and end a unit of work arbitrarily, inject the UnitOfWork interface:
+
+	public class MyBackgroundWorker {
+		@Inject private UnitOfWork unitOfWork;
+		
+		public void doSomeWork() {
+			unitOfWork.begin();
+			try { 
+				// Do transactions, queries, etc...
+				//...
+			} finally {
+				unitOfWork.end(); 
+			}
+		} 
+	}
+	
+You are free to call any @Transactional methods while a unit of work is in progress this way. When end() is called, any existing session is closed
+and discarded. It is safe to call begin() multiple times--if a unit of work is in progress, nothing happens. Similarly, if one is ended calling end()
+returns silently. UnitOfWork is threadsafe and can be cached for multiple uses or injected directly into singletons.
+
 >>>>>
 Minimize mutability
 
